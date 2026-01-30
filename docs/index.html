@@ -6,515 +6,625 @@
   <title>バレー集計結果（閲覧）</title>
   <style>
     :root{
-      --bg:#0b0f19; --panel:#121a2a; --panel2:#0f1626;
-      --border:#24314f; --text:#e7ecff; --muted:#a8b3d6; --good:#79ffa5; --warn:#ffd479;
+      --bg:#0b0f19; --panel:#121a2a; --border:#24314f;
+      --text:#e7ecff; --muted:#a8b3d6; --chip:#0f1627;
+      --ok:#7ee0a3; --warn:#ffd28a; --bad:#ff9aa2;
     }
     *{ box-sizing:border-box; }
     body{ margin:0; font-family:system-ui,-apple-system,"Segoe UI","Hiragino Sans","Noto Sans JP","Yu Gothic",sans-serif; background:var(--bg); color:var(--text); }
     a{ color:inherit; }
-    .wrap{ max-width:1200px; margin:0 auto; padding:14px; }
-    header{ display:flex; gap:12px; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; }
-    h1{ font-size:18px; margin:0; }
-    .meta{ color:var(--muted); font-size:12px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-    .pill{ display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border:1px solid var(--border); border-radius:999px; color:var(--muted); }
-    .pill b{ color:var(--text); font-weight:650; }
-    .grid{ display:grid; grid-template-columns: 1.05fr .95fr; gap:12px; margin-top:12px; }
-    @media (max-width: 980px){ .grid{ grid-template-columns:1fr; } }
-    .card{ background:rgba(18,26,42,.9); border:1px solid var(--border); border-radius:16px; padding:12px; }
-    .card h2{ font-size:13px; margin:0 0 10px; display:flex; justify-content:space-between; gap:8px; align-items:center; }
-    .row{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
-    @media (max-width: 560px){ .row{ grid-template-columns:1fr; } }
-    label{ display:block; font-size:12px; color:var(--muted); margin:0 0 6px; }
-    select,input{
-      width:100%; border-radius:12px; border:1px solid var(--border);
-      background:rgba(11,15,25,.9); color:var(--text); padding:10px 10px; font-size:13px; outline:none;
-    }
+    .wrap{ max-width:1200px; margin:0 auto; padding:16px; }
+    .top{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap; }
+    h1{ margin:0; font-size:18px; }
+    .sub{ margin:6px 0 0; color:var(--muted); font-size:12px; line-height:1.45; }
+    .btns{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
     button{
-      border-radius:12px; border:1px solid var(--border);
+      border-radius:10px; border:1px solid var(--border);
       background:rgba(11,15,25,.9); color:var(--text);
-      padding:9px 10px; font-size:1
-cd /Users/ikedakazuki/valley-input-page/valley-results-site
-
-cat > docs/index.html <<'EOF'
-<!doctype html>
-<html lang="ja">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>バレー集計結果（閲覧）</title>
-  <style>
-    :root{
-      --bg:#0b0f19; --panel:#121a2a; --panel2:#0f1626;
-      --border:#24314f; --text:#e7ecff; --muted:#a8b3d6; --good:#79ffa5; --warn:#ffd479;
-    }
-    *{ box-sizing:border-box; }
-    body{ margin:0; font-family:system-ui,-apple-system,"Segoe UI","Hiragino Sans","Noto Sans JP","Yu Gothic",sans-serif; background:var(--bg); color:var(--text); }
-    a{ color:inherit; }
-    .wrap{ max-width:1200px; margin:0 auto; padding:14px; }
-    header{ display:flex; gap:12px; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; }
-    h1{ font-size:18px; margin:0; }
-    .meta{ color:var(--muted); font-size:12px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-    .pill{ display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border:1px solid var(--border); border-radius:999px; color:var(--muted); }
-    .pill b{ color:var(--text); font-weight:650; }
-    .grid{ display:grid; grid-template-columns: 1.05fr .95fr; gap:12px; margin-top:12px; }
-    @media (max-width: 980px){ .grid{ grid-template-columns:1fr; } }
-    .card{ background:rgba(18,26,42,.9); border:1px solid var(--border); border-radius:16px; padding:12px; }
-    .card h2{ font-size:13px; margin:0 0 10px; display:flex; justify-content:space-between; gap:8px; align-items:center; }
-    .row{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
-    @media (max-width: 560px){ .row{ grid-template-columns:1fr; } }
-    label{ display:block; font-size:12px; color:var(--muted); margin:0 0 6px; }
-    select,input{
-      width:100%; border-radius:12px; border:1px solid var(--border);
-      background:rgba(11,15,25,.9); color:var(--text); padding:10px 10px; font-size:13px; outline:none;
-    }
-    button{
-      border-radius:12px; border:1px solid var(--border);
-      background:rgba(11,15,25,.9); color:var(--text);
-      padding:9px 10px; font-size:12px; cursor:pointer;
+      padding:8px 10px; font-size:12px; cursor:pointer;
     }
     button:hover{ filter:brightness(1.08); }
-    .btns{ display:flex; flex-wrap:wrap; gap:8px; }
-    .hint{ font-size:11px; color:var(--muted); margin-top:8px; line-height:1.5; }
-    table{ width:100%; border-collapse:separate; border-spacing:0; border:1px solid var(--border); border-radius:14px; overflow:hidden; background:rgba(11,15,25,.65); font-size:12px; }
-    th,td{ padding:9px 8px; border-bottom:1px solid rgba(36,49,79,.55); vertical-align:middle; }
-    th{ text-align:left; background:rgba(18,26,42,.55); color:var(--muted); font-weight:650; }
+    .chip{ display:inline-flex; align-items:center; gap:6px; border:1px solid var(--border); background:rgba(11,15,25,.55); padding:6px 10px; border-radius:999px; font-size:12px; color:var(--muted); }
+    .grid{ display:grid; grid-template-columns: 1.1fr .9fr; gap:12px; margin-top:14px; }
+    @media (max-width: 980px){ .grid{ grid-template-columns:1fr; } }
+    .card{ background:rgba(18,26,42,.9); border:1px solid var(--border); border-radius:16px; padding:12px; }
+    .card h2{ margin:0 0 10px; font-size:13px; display:flex; justify-content:space-between; align-items:center; gap:8px; }
+    .tabs{ display:flex; gap:8px; flex-wrap:wrap; }
+    .tab{ padding:6px 10px; border-radius:999px; border:1px solid var(--border); background:rgba(11,15,25,.55); font-size:12px; color:var(--muted); cursor:pointer; user-select:none; }
+    .tab.active{ color:var(--text); border-color:rgba(231,236,255,.35); background:rgba(11,15,25,.85); }
+    .row{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    @media (max-width: 700px){ .row{ grid-template-columns:1fr; } }
+    .kpi{ border:1px solid var(--border); border-radius:14px; padding:10px; background:rgba(11,15,25,.55); }
+    .kpi .t{ font-size:11px; color:var(--muted); }
+    .kpi .v{ font-size:18px; font-weight:700; margin-top:3px; }
+    .kpi .s{ font-size:11px; color:var(--muted); margin-top:2px; line-height:1.35; }
+    label{ font-size:12px; color:var(--muted); display:block; margin:0 0 6px; }
+    select,input{
+      width:100%; border-radius:10px; border:1px solid var(--border);
+      background:rgba(11,15,25,.9); color:var(--text); padding:9px 10px; font-size:13px; outline:none;
+    }
+    table{ width:100%; border-collapse:separate; border-spacing:0; border:1px solid var(--border); border-radius:14px; overflow:hidden; background:rgba(11,15,25,.55); font-size:12px; }
+    th,td{ padding:8px; border-bottom:1px solid rgba(36,49,79,.6); }
+    th{ text-align:left; background:rgba(18,26,42,.55); color:var(--muted); font-weight:600; }
     tr:last-child td{ border-bottom:none; }
     .right{ text-align:right; }
-    .small{ font-size:11px; color:var(--muted); }
-    .kpi{ display:flex; gap:10px; flex-wrap:wrap; }
-    .kpi .box{ background:rgba(11,15,25,.55); border:1px solid var(--border); border-radius:14px; padding:10px; min-width:170px; flex:1; }
-    .kpi .box .t{ font-size:11px; color:var(--muted); }
-    .kpi .box .v{ font-size:18px; font-weight:750; margin-top:4px; }
-    .bar{ height:10px; border-radius:999px; border:1px solid var(--border); overflow:hidden; background:rgba(11,15,25,.55); }
-    .bar > div{ height:100%; width:0%; background:linear-gradient(90deg, #8af, #7fa, #ffd479); }
-    details{ border:1px solid var(--border); border-radius:14px; background:rgba(11,15,25,.55); padding:8px 10px; }
-    summary{ cursor:pointer; font-size:12px; color:var(--muted); }
-    pre{ margin:10px 0 0; border:1px solid var(--border); border-radius:14px; background:rgba(11,15,25,.85); padding:10px; overflow:auto; max-height:320px; font-size:11px; line-height:1.45; }
-    .bad{ color:#ff9aa2; }
+    .muted{ color:var(--muted); }
+    .note{ font-size:11px; color:var(--muted); line-height:1.5; }
+    .list{ display:flex; flex-direction:column; gap:8px; }
+    .item{ border:1px solid var(--border); border-radius:14px; padding:10px; background:rgba(11,15,25,.55); }
+    .item .t{ font-weight:650; font-size:12px; }
+    .item .s{ font-size:11px; color:var(--muted); margin-top:4px; line-height:1.4; }
+    pre{ margin:0; border:1px solid var(--border); border-radius:14px; background:rgba(11,15,25,.85); padding:10px; overflow:auto; max-height:320px; font-size:11px; line-height:1.45; }
+    .pill{ font-size:11px; color:var(--muted); border:1px solid var(--border); padding:3px 8px; border-radius:999px; }
+    .badgeOk{ color:rgba(126,224,163,.95); border-color:rgba(126,224,163,.35); }
+    .badgeWarn{ color:rgba(255,210,138,.95); border-color:rgba(255,210,138,.35); }
+    .badgeBad{ color:rgba(255,154,162,.95); border-color:rgba(255,154,162,.35); }
+
+    /* map */
+    .mapGrid{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    @media (max-width: 700px){ .mapGrid{ grid-template-columns:1fr; } }
+    .mapBox{ border:1px solid var(--border); border-radius:14px; background:rgba(11,15,25,.55); padding:10px; }
+    .mapTitle{ display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px; }
+    .mapTitle .t{ font-weight:650; font-size:12px; }
+    .mapTitle .s{ font-size:11px; color:var(--muted); }
+    canvas{ width:100%; aspect-ratio:1/1; border-radius:12px; border:1px solid rgba(36,49,79,.8); background:
+      linear-gradient(to right, rgba(36,49,79,.22) 1px, transparent 1px) 0 0 / calc(100%/6) 100%,
+      linear-gradient(to bottom, rgba(36,49,79,.22) 1px, transparent 1px) 0 0 / 100% calc(100%/6),
+      rgba(11,15,25,.85);
+    }
   </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
+  <div class="top">
     <div>
       <h1>バレー集計結果（閲覧）</h1>
-      <div class="meta" id="topMeta">
-        <span class="pill">更新: <b id="updatedAt">—</b></span>
-        <span class="pill">データ: <b id="dataHint">—</b></span>
-      </div>
+      <div class="sub" id="topSub">./results.json を読み込み中…</div>
     </div>
     <div class="btns">
+      <span class="chip" id="chipUpdated">更新: --</span>
+      <span class="chip" id="chipMatches">matches: --</span>
       <button id="btnReload">再読み込み</button>
     </div>
-  </header>
+  </div>
 
   <div class="grid">
-    <!-- LEFT -->
     <div class="card">
-      <h2>試合（または集計単位）</h2>
+      <h2>
+        <span>試合（または集計単位）</span>
+        <span class="tabs" id="tabs">
+          <span class="tab active" data-tab="overview">概要</span>
+          <span class="tab" data-tab="team">チーム</span>
+          <span class="tab" data-tab="players">選手</span>
+          <span class="tab" data-tab="maps">マップ</span>
+          <span class="tab" data-tab="debug">デバッグ</span>
+        </span>
+      </h2>
 
       <div class="row">
         <div>
           <label>対象</label>
-          <select id="selMatch"></select>
+          <select id="matchSel"></select>
         </div>
         <div>
           <label>選手検索</label>
-          <input id="playerQuery" type="text" placeholder="例：池田 / #12 など">
+          <input id="playerSearch" type="text" placeholder="例：池田 / #12">
         </div>
       </div>
 
-      <div class="hint" id="matchMeta">—</div>
+      <div style="margin-top:10px;" id="panel_overview"></div>
+      <div style="margin-top:10px; display:none;" id="panel_team"></div>
+      <div style="margin-top:10px; display:none;" id="panel_players"></div>
+      <div style="margin-top:10px; display:none;" id="panel_maps"></div>
+      <div style="margin-top:10px; display:none;" id="panel_debug"></div>
 
-      <div style="margin-top:10px;" class="kpi" id="kpis"></div>
-
-      <div style="margin-top:12px;">
-        <h2 style="margin:0 0 10px; font-size:13px;">チーム集計（スキル別）</h2>
-        <div id="teamSkillTable"></div>
-      </div>
-
-      <div style="margin-top:12px;">
-        <h2 style="margin:0 0 10px; font-size:13px;">選手別集計</h2>
-        <div class="hint" style="margin:0 0 8px;">
-          ※ 効果率は（得点=1, 効果的=0.7, 継続=0.3, ミス=0）で計算（結果がこの4区分の場合）。<br>
-          ※ もし results.json に weights が入っている場合はそちらを優先。
-        </div>
-        <div id="playerTable"></div>
+      <div class="note" style="margin-top:10px;">
+        ※ 効果率は（得点=1, 効果的=0.7, 継続=0.3, ミス=0）の重みで計算（results.json の weights があればそれを優先）
       </div>
     </div>
 
-    <!-- RIGHT -->
     <div class="card">
-      <h2>データ確認</h2>
-
-      <details>
-        <summary>results.json をそのまま表示（デバッグ用）</summary>
-        <pre id="rawJson">loading...</pre>
-      </details>
-
-      <div class="hint">
-        ※ このページは <code>./results.json</code> を読み込んで表示します。<br>
-        ※ 反映が遅いときは「再読み込み」を押して、ブラウザ更新も試してください。
+      <h2>今日見るべきポイント <span class="pill" id="hintPill">—</span></h2>
+      <div id="insights" class="list"></div>
+      <div class="note" style="margin-top:10px;">
+        ここは「ユーザーに寄り添う」枠：<br>
+        ・チームで一番伸びしろが大きいスキル<br>
+        ・ミス比率が高い箇所<br>
+        ・トスの偏り（ある場合）など
       </div>
-
-      <div class="hint" id="errBox"></div>
     </div>
   </div>
 </div>
 
 <script>
 (() => {
-  const $ = (id) => document.getElementById(id);
+  const $ = (id)=>document.getElementById(id);
 
-  const DEFAULT_WEIGHTS = {
-    spike: { point:1, effective:0.7, continue:0.3, miss:0 },
-    serve: { point:1, effective:0.7, continue:0.3, miss:0 },
-    block: { point:1, effective:0.7, continue:0.3, miss:0 },
-    receive:{ point:1, effective:0.7, continue:0.3, miss:0 },
-    set:   { point:1, effective:0.7, continue:0.3, miss:0 },
+  const skillLabel = {
+    spike:"スパイク", serve:"サーブ", block:"ブロック",
+    serve_cut:"サーブカット", dig:"ディグ", set:"トス"
+  };
+  const resultLabel = { point:"得点", effective:"効果的", continue:"継続", miss:"ミス" };
+
+  const defaultWeights = {
+    spike:{point:1,effective:0.7,continue:0.3,miss:0},
+    serve:{point:1,effective:0.7,continue:0.3,miss:0},
+    block:{point:1,effective:0.7,continue:0.3,miss:0},
+    serve_cut:{point:1,effective:0.7,continue:0.3,miss:0},
+    dig:{point:1,effective:0.7,continue:0.3,miss:0},
+    set:{point:1,effective:0.7,continue:0.3,miss:0}
   };
 
-  const SKILL_LABEL = {
-    spike:"スパイク", serve:"サーブ", block:"ブロック", receive:"レシーブ", set:"トス"
-  };
-  const RESULT_LABEL = {
-    point:"得点", effective:"効果的", continue:"継続", miss:"ミス"
-  };
-
-  let ROOT = null;     // loaded results.json root
-  let MATCHES = [];    // normalized matches list
-  let curMatchId = null;
+  let data = null;
+  let activeMatch = null;
+  let activeTab = "overview";
 
   function esc(s){
-    return String(s ?? "").replace(/[&<>"']/g, (c)=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+    return String(s).replace(/[&<>"']/g,(c)=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
   }
 
-  function toPct(x){
+  function pct(x){
     if (!Number.isFinite(x)) return "—";
     return (x*100).toFixed(1) + "%";
   }
 
   function sumCounts(counts){
-    let t = 0;
-    for (const k of Object.keys(counts||{})) {
-      const v = Number(counts[k] ?? 0);
-      if (Number.isFinite(v)) t += v;
-    }
-    return t;
+    return (counts.point||0)+(counts.effective||0)+(counts.continue||0)+(counts.miss||0);
   }
 
-  function calcScoreFromCounts(counts, weights){
-    const w = weights || {};
+  function effectRate(counts, weights){
     const total = sumCounts(counts);
-    if (!total) return { total:0, score:NaN };
-    let s = 0;
-    for (const [rk, rv] of Object.entries(counts||{})) {
-      const c = Number(rv ?? 0);
-      if (!Number.isFinite(c)) continue;
-      const ww = (rk in w) ? Number(w[rk]) : 0;
-      s += c * (Number.isFinite(ww) ? ww : 0);
+    if (total <= 0) return null;
+    const w = weights || {};
+    const p = (counts.point||0) * (w.point ?? 1);
+    const e = (counts.effective||0) * (w.effective ?? 0.7);
+    const c = (counts.continue||0) * (w.continue ?? 0.3);
+    const m = (counts.miss||0) * (w.miss ?? 0);
+    return (p+e+c+m)/total;
+  }
+
+  function computeSummaryFromEvents(events){
+    const byPlayer = {};
+    for (const ev of (events||[])){
+      const pid = String(ev.playerId||"");
+      const sk  = String(ev.skill||"");
+      const rs  = String(ev.result||"");
+      if (!pid || !sk || !rs) continue;
+      byPlayer[pid] ||= {};
+      byPlayer[pid][sk] ||= { counts:{} };
+      const counts = byPlayer[pid][sk].counts;
+      counts[rs] = (counts[rs]||0) + 1;
     }
-    return { total, score: s / total };
+    return { byPlayer };
   }
 
-  function normalizeMatches(root){
-    // 1) root.matches があればそれを使う
-    if (root && Array.isArray(root.matches) && root.matches.length) {
-      return root.matches.map((m, i) => ({
-        id: m.id ?? String(i),
-        meta: m.meta ?? {},
-        players: Array.isArray(m.players) ? m.players : [],
-        summary: m.summary ?? m.agg ?? {},
-        weights: m.weights ?? root.weights ?? null,
-        raw: m
-      }));
-    }
-
-    // 2) 単一データの場合
-    return [{
-      id: root?.id ?? "default",
-      meta: root?.meta ?? {},
-      players: Array.isArray(root?.players) ? root.players : [],
-      summary: root?.summary ?? root?.agg ?? {},
-      weights: root?.weights ?? null,
-      raw: root
-    }];
+  function getSummary(match){
+    if (match.summary && match.summary.byPlayer) return match.summary;
+    // schemaVersion 2 では events も入ってる想定。なければ空。
+    return computeSummaryFromEvents(match.events||[]);
   }
 
-  function matchTitle(m){
-    const d = m.meta?.date ?? "";
-    const opp = m.meta?.opp ?? m.meta?.opponent ?? "";
-    const venue = m.meta?.venue ?? "";
-    const parts = [];
-    if (d) parts.push(d);
-    if (opp) parts.push(opp);
-    if (venue) parts.push(venue);
-    return parts.length ? parts.join(" / ") : `集計 ${m.id}`;
-  }
+  function buildTeamSummary(match){
+    const summary = getSummary(match);
+    const weightsAll = match.weights || defaultWeights;
 
-  function pickWeights(m){
-    return m.weights || DEFAULT_WEIGHTS;
-  }
-
-  function buildPlayerMap(m){
-    const map = new Map();
-    for (const p of (m.players||[])) {
-      if (!p) continue;
-      const id = p.id ?? p.playerId ?? p.key ?? p.name;
-      if (!id) continue;
-      map.set(String(id), { id:String(id), name:p.name ?? p.playerName ?? String(id), no: p.no ?? p.number ?? "" });
-    }
-    return map;
-  }
-
-  function normalizeSummary(m){
-    // 期待: summary.byPlayer[playerId][skill].counts or {point,effective,...}
-    // または summary が { playerName: { skill: {point...} } } みたいな形でも拾う
-    const s = m.summary || {};
-    const byPlayer = s.byPlayer || s.players || null;
-
-    if (byPlayer && typeof byPlayer === "object") return { byPlayer };
-
-    // fallback: playerNameキー形式
-    // => 擬似playerId = playerName で扱う
-    if (s && typeof s === "object") {
-      const keys = Object.keys(s);
-      // bySkillなどのメタっぽいのを除外して「それ以外がプレイヤー」っぽければ採用
-      const ignore = new Set(["bySkill","team","meta","weights","updatedAt","matches","summary","agg"]);
-      const cand = keys.filter(k => !ignore.has(k));
-      if (cand.length) {
-        const bp = {};
-        for (const pn of cand) bp[pn] = s[pn];
-        return { byPlayer: bp };
+    // team[skill] counts
+    const team = {};
+    for (const pid of Object.keys(summary.byPlayer||{})){
+      for (const sk of Object.keys(summary.byPlayer[pid]||{})){
+        const counts = summary.byPlayer[pid][sk].counts || {};
+        team[sk] ||= { point:0,effective:0,continue:0,miss:0 };
+        team[sk].point += (counts.point||0);
+        team[sk].effective += (counts.effective||0);
+        team[sk].continue += (counts.continue||0);
+        team[sk].miss += (counts.miss||0);
       }
     }
-    return { byPlayer: {} };
+
+    const rows = Object.keys(team).sort().map(sk=>{
+      const counts = team[sk];
+      const total = sumCounts(counts);
+      const er = effectRate(counts, weightsAll[sk] || defaultWeights[sk] || defaultWeights.spike);
+      return { sk, label:skillLabel[sk]||sk, er, total, ...counts };
+    });
+
+    return rows;
   }
 
-  function computeTeamBySkill(byPlayer){
-    const out = {};
-    for (const [pid, pObj] of Object.entries(byPlayer||{})) {
-      if (!pObj || typeof pObj !== "object") continue;
-      for (const [skill, val] of Object.entries(pObj||{})) {
-        if (!val || typeof val !== "object") continue;
-        const counts = val.counts || val;
-        out[skill] ||= {};
-        for (const [rk, rv] of Object.entries(counts||{})) {
-          const n = Number(rv ?? 0);
-          if (!Number.isFinite(n)) continue;
-          out[skill][rk] = (out[skill][rk] || 0) + n;
+  function buildPlayerRows(match, q){
+    const summary = getSummary(match);
+    const players = match.players || [];
+    const weightsAll = match.weights || defaultWeights;
+
+    const byId = new Map(players.map(p=>[p.id,p]));
+    const rows = [];
+
+    for (const p of players){
+      const name = p.name || "";
+      const no = p.no || "";
+      const key = (name + " " + no).toLowerCase();
+      if (q && !key.includes(q)) continue;
+
+      const perSkill = summary.byPlayer?.[p.id] || {};
+      // normalize: each skill => counts + er + total
+      const skills = {};
+      for (const sk of Object.keys(perSkill)){
+        const counts = perSkill[sk].counts || {};
+        const total = sumCounts(counts);
+        const er = effectRate(counts, (weightsAll[sk] || defaultWeights[sk] || defaultWeights.spike));
+        skills[sk] = { counts, total, er };
+      }
+      rows.push({ p, skills });
+    }
+
+    return rows;
+  }
+
+  function approxRecordCount(match){
+    if (Array.isArray(match.events)) return match.events.length;
+    // summary から概算
+    const summary = getSummary(match);
+    let n = 0;
+    for (const pid of Object.keys(summary.byPlayer||{})){
+      for (const sk of Object.keys(summary.byPlayer[pid]||{})){
+        n += sumCounts(summary.byPlayer[pid][sk].counts||{});
+      }
+    }
+    return n;
+  }
+
+  function renderOverview(match){
+    const meta = match.meta || {};
+    const players = match.players || [];
+    const recN = approxRecordCount(match);
+
+    const html = `
+      <div class="row">
+        <div class="kpi">
+          <div class="t">試合情報</div>
+          <div class="s">日付: ${esc(meta.date||"—")} / 相手: ${esc(meta.opp||"—")}</div>
+          <div class="s">会場: ${esc(meta.venue||"—")} / メモ: ${esc(meta.memo||"—")}</div>
+        </div>
+        <div class="kpi">
+          <div class="t">データ規模</div>
+          <div class="v">${players.length} <span class="muted" style="font-size:12px;">選手</span></div>
+          <div class="s">記録数: ${recN}</div>
+        </div>
+      </div>
+    `;
+    $("panel_overview").innerHTML = html;
+
+    // insights
+    renderInsights(match);
+  }
+
+  function renderTeam(match){
+    const rows = buildTeamSummary(match);
+
+    let html = `<div class="kpi"><div class="t">チーム集計（スキル別）</div><div class="s muted">ディグとサーブカットは別スキルとして集計</div></div>`;
+    if (rows.length === 0){
+      html += `<div class="note" style="margin-top:10px;">集計データがありません（results.json に summary か events が必要）</div>`;
+      $("panel_team").innerHTML = html;
+      return;
+    }
+
+    html += `<div style="margin-top:10px;"><table>
+      <thead><tr>
+        <th>スキル</th>
+        <th class="right">効果率</th>
+        <th class="right">合計</th>
+        <th class="right">得点</th>
+        <th class="right">効果的</th>
+        <th class="right">継続</th>
+        <th class="right">ミス</th>
+      </tr></thead><tbody>`;
+
+    for (const r of rows){
+      html += `<tr>
+        <td>${esc(r.label)}</td>
+        <td class="right">${r.er==null ? "—" : pct(r.er)}</td>
+        <td class="right">${r.total}</td>
+        <td class="right">${r.point}</td>
+        <td class="right">${r.effective}</td>
+        <td class="right">${r.continue}</td>
+        <td class="right">${r.miss}</td>
+      </tr>`;
+    }
+    html += `</tbody></table></div>`;
+    $("panel_team").innerHTML = html;
+  }
+
+  function renderPlayers(match){
+    const q = ($("playerSearch").value || "").trim().toLowerCase();
+    const rows = buildPlayerRows(match, q);
+
+    if (rows.length === 0){
+      $("panel_players").innerHTML = `<div class="note">一致する選手がいません</div>`;
+      return;
+    }
+
+    // skills shown in fixed order
+    const skillOrder = ["block","serve_cut","dig","serve","set","spike"];
+
+    let html = `<div class="note">クリックや展開は“次の段階”で追加できる（まず読みやすさ優先）</div>`;
+
+    html += `<div style="margin-top:10px;"><table>
+      <thead><tr>
+        <th>選手</th>
+        ${skillOrder.map(sk=>`<th class="right">${esc(skillLabel[sk]||sk)}</th>`).join("")}
+      </tr></thead><tbody>`;
+
+    for (const row of rows){
+      const p = row.p;
+      const name = p.name || "(no name)";
+      const no = p.no ? ` #${p.no}` : "";
+      html += `<tr><td>${esc(name+no)}</td>`;
+      for (const sk of skillOrder){
+        const s = row.skills[sk];
+        if (!s || !s.total){
+          html += `<td class="right"><span class="muted">—</span><div class="muted" style="font-size:11px;">0回</div></td>`;
+        }else{
+          html += `<td class="right">${pct(s.er)}<div class="muted" style="font-size:11px;">${s.total}回</div></td>`;
         }
       }
-    }
-    return out;
-  }
-
-  function renderKPIs(m, byPlayer){
-    const playersN = m.players?.length || Object.keys(byPlayer||{}).length || 0;
-
-    // 全スキル合計試行数
-    let events = 0;
-    for (const p of Object.values(byPlayer||{})) {
-      for (const v of Object.values(p||{})) {
-        const counts = v?.counts || v;
-        events += sumCounts(counts);
-      }
+      html += `</tr>`;
     }
 
-    const html = `
-      <div class="box"><div class="t">選手数</div><div class="v">${playersN}</div></div>
-      <div class="box"><div class="t">記録数（概算）</div><div class="v">${events}</div></div>
-      <div class="box"><div class="t">相手</div><div class="v" style="font-size:14px;">${esc(m.meta?.opp ?? m.meta?.opponent ?? "—")}</div></div>
-    `;
-    $("kpis").innerHTML = html;
+    html += `</tbody></table></div>`;
+    $("panel_players").innerHTML = html;
   }
 
-  function renderTeamSkillTable(m, teamBySkill){
-    const wAll = pickWeights(m);
-
-    const skills = Object.keys(teamBySkill||{}).sort();
-    if (!skills.length) {
-      $("teamSkillTable").innerHTML = `<div class="hint">集計データがありません（results.json の summary を確認）</div>`;
+  function renderMaps(match){
+    const events = match.events || [];
+    if (!Array.isArray(events) || events.length === 0){
+      $("panel_maps").innerHTML = `<div class="note">場所データがありません。入力側で「位置クリック」を使って events に pos/to を入れてください。</div>`;
       return;
     }
 
-    let rows = "";
-    for (const sk of skills) {
-      const counts = teamBySkill[sk] || {};
-      const weights = wAll[sk] || DEFAULT_WEIGHTS[sk] || {};
-      const { total, score } = calcScoreFromCounts(counts, weights);
+    const q = ($("playerSearch").value || "").trim().toLowerCase();
+    const players = match.players || [];
+    const byId = new Map(players.map(p=>[p.id,p]));
 
-      // point/effective/continue/miss を優先表示
-      const p = Number(counts.point ?? 0), e = Number(counts.effective ?? 0), c = Number(counts.continue ?? 0), m0 = Number(counts.miss ?? 0);
-      const knownTotal = (Number.isFinite(p)?p:0)+(Number.isFinite(e)?e:0)+(Number.isFinite(c)?c:0)+(Number.isFinite(m0)?m0:0);
-      const note = (knownTotal === total) ? "" : `<span class="small">（他区分あり）</span>`;
+    // filter by player search (name/no)
+    const filtered = events.filter(ev=>{
+      const p = byId.get(ev.playerId);
+      const key = ((p?.name||"") + " " + (p?.no||"")).toLowerCase();
+      return q ? key.includes(q) : true;
+    });
 
-      rows += `
-        <tr>
-          <td>${esc(SKILL_LABEL[sk] || sk)}</td>
-          <td class="right">${toPct(score)}</td>
-          <td class="right">${total || 0}</td>
-          <td class="right">${Number.isFinite(p)?p:0}</td>
-          <td class="right">${Number.isFinite(e)?e:0}</td>
-          <td class="right">${Number.isFinite(c)?c:0}</td>
-          <td class="right">${Number.isFinite(m0)?m0:0} ${note}</td>
-        </tr>
-      `;
-    }
+    // split: receive types + set target
+    const posServeCut = filtered.filter(e=>e.skill==="serve_cut" && e.pos);
+    const posDig      = filtered.filter(e=>e.skill==="dig" && e.pos);
+    const toSet       = filtered.filter(e=>e.skill==="set" && e.to);
 
     const html = `
-      <table>
-        <thead>
-          <tr>
-            <th>スキル</th>
-            <th class="right">効果率</th>
-            <th class="right">合計</th>
-            <th class="right">得点</th>
-            <th class="right">効果的</th>
-            <th class="right">継続</th>
-            <th class="right">ミス</th>
-          </tr>
-        </thead>
-        <tbody>${rows}</tbody>
-      </table>
+      <div class="mapGrid">
+        <div class="mapBox">
+          <div class="mapTitle">
+            <div class="t">サーブカット位置</div>
+            <div class="s">${posServeCut.length}件</div>
+          </div>
+          <canvas id="cvServeCut" width="500" height="500"></canvas>
+        </div>
+        <div class="mapBox">
+          <div class="mapTitle">
+            <div class="t">ディグ位置</div>
+            <div class="s">${posDig.length}件</div>
+          </div>
+          <canvas id="cvDig" width="500" height="500"></canvas>
+        </div>
+      </div>
+
+      <div class="mapBox" style="margin-top:10px;">
+        <div class="mapTitle">
+          <div class="t">トス先（to）</div>
+          <div class="s">${toSet.length}件</div>
+        </div>
+        <canvas id="cvSetTo" width="500" height="500"></canvas>
+        <div class="note" style="margin-top:8px;">※ “トスの場所”を「トス先」として可視化（入力側で右のコートをクリック）</div>
+      </div>
     `;
-    $("teamSkillTable").innerHTML = html;
+    $("panel_maps").innerHTML = html;
+
+    drawDots("cvServeCut", posServeCut.map(e=>e.pos));
+    drawDots("cvDig", posDig.map(e=>e.pos));
+    drawDots("cvSetTo", toSet.map(e=>e.to));
   }
 
-  function renderPlayerTable(m, byPlayer, query){
-    const wAll = pickWeights(m);
-    const pmap = buildPlayerMap(m);
+  function drawDots(canvasId, points){
+    const cv = $(canvasId);
+    const ctx = cv.getContext("2d");
+    ctx.clearRect(0,0,cv.width,cv.height);
 
-    // playerId一覧
-    const ids = Object.keys(byPlayer||{});
-    const list = ids.map(pid => {
-      const p = pmap.get(String(pid)) || { id:String(pid), name:String(pid), no:"" };
-      return { pid:String(pid), name:p.name, no:p.no, obj:byPlayer[pid] || {} };
-    }).sort((a,b)=>a.name.localeCompare(b.name, "ja"));
+    // dots (no fixed colors requested; use default stroke/fill)
+    for (const p of points){
+      const x = p.x * cv.width;
+      const y = p.y * cv.height;
+      ctx.beginPath();
+      ctx.arc(x,y,4,0,Math.PI*2);
+      ctx.fill();
+      ctx.stroke();
+    }
+  }
 
-    const q = (query || "").trim().toLowerCase();
-    const filtered = q
-      ? list.filter(x => (`${x.name} ${x.no} ${x.pid}`).toLowerCase().includes(q))
-      : list;
+  function renderDebug(match){
+    $("panel_debug").innerHTML = `
+      <div class="note">results.json をそのまま表示（デバッグ用）</div>
+      <div style="margin-top:10px;"><pre>${esc(JSON.stringify(match, null, 2))}</pre></div>
+    `;
+  }
 
-    if (!filtered.length) {
-      $("playerTable").innerHTML = `<div class="hint">該当する選手がいません</div>`;
+  function renderInsights(match){
+    const box = $("insights");
+    box.innerHTML = "";
+
+    const teamRows = buildTeamSummary(match);
+    const recN = approxRecordCount(match);
+
+    $("hintPill").textContent = `記録: ${recN}`;
+
+    if (teamRows.length === 0){
+      box.innerHTML = `<div class="item"><div class="t">データ不足</div><div class="s">summary か events が results.json に必要</div></div>`;
       return;
     }
 
-    // 表示するスキル列（存在するものだけ）
-    const skillSet = new Set();
-    for (const x of filtered) for (const sk of Object.keys(x.obj||{})) skillSet.add(sk);
-    const skills = [...skillSet].sort();
+    // find lowest effect rate (needs >=5)
+    const candidates = teamRows.filter(r=>r.total>=5 && r.er!=null).sort((a,b)=>a.er-b.er);
+    const worst = candidates[0];
 
-    // header
-    let head = `<tr><th>選手</th>`;
-    for (const sk of skills) head += `<th class="right">${esc(SKILL_LABEL[sk] || sk)}</th>`;
-    head += `</tr>`;
+    // find highest miss ratio
+    const missCand = teamRows.filter(r=>r.total>=5).map(r=>{
+      const missRatio = r.total ? (r.miss/r.total) : 0;
+      return {...r, missRatio};
+    }).sort((a,b)=>b.missRatio-a.missRatio)[0];
 
-    // rows
-    let rows = "";
-    for (const x of filtered) {
-      const name = x.no ? `${x.name} <span class="small">#${esc(x.no)}</span>` : esc(x.name);
-      let r = `<tr><td>${name}</td>`;
-      for (const sk of skills) {
-        const val = x.obj?.[sk];
-        const counts = val?.counts || val || {};
-        const weights = wAll?.[sk] || DEFAULT_WEIGHTS[sk] || {};
-        const { total, score } = calcScoreFromCounts(counts, weights);
-        const pct = toPct(score);
-        r += `<td class="right">${pct}<div class="small">${total||0}回</div></td>`;
+    if (worst){
+      box.appendChild(insightCard(
+        "伸びしろが大きいスキル",
+        `${worst.label} の効果率が低め（${pct(worst.er)} / ${worst.total}回）`,
+        "ここを改善すると全体が伸びやすい"
+      ));
+    }
+    if (missCand){
+      box.appendChild(insightCard(
+        "ミスが目立つスキル",
+        `${missCand.label} のミス比率 ${pct(missCand.missRatio)}（${missCand.miss}/${missCand.total}）`,
+        "ミス原因（狙い/フォーム/判断）をメモと合わせて見直す"
+      ));
+    }
+
+    // set target bias (if to exists)
+    const events = match.events || [];
+    const setTo = events.filter(e=>e.skill==="set" && e.to);
+    if (setTo.length >= 8){
+      // coarse bins 3x3
+      const bins = Array.from({length:9}, ()=>0);
+      for (const e of setTo){
+        const ix = Math.min(2, Math.floor(e.to.x*3));
+        const iy = Math.min(2, Math.floor(e.to.y*3));
+        bins[iy*3+ix]++;
       }
-      r += `</tr>`;
-      rows += r;
-    }
-
-    $("playerTable").innerHTML = `
-      <table>
-        <thead>${head}</thead>
-        <tbody>${rows}</tbody>
-      </table>
-    `;
-  }
-
-  function renderMatchMeta(m){
-    const parts = [];
-    const d = m.meta?.date ?? "";
-    const opp = m.meta?.opp ?? m.meta?.opponent ?? "";
-    const v = m.meta?.venue ?? "";
-    const memo = m.meta?.memo ?? "";
-    if (d) parts.push(`日付: ${esc(d)}`);
-    if (opp) parts.push(`相手: ${esc(opp)}`);
-    if (v) parts.push(`会場: ${esc(v)}`);
-    if (memo) parts.push(`メモ: ${esc(memo)}`);
-    $("matchMeta").innerHTML = parts.length ? parts.join(" / ") : "—";
-  }
-
-  function setTopMeta(root){
-    const upd = root?.updatedAt ?? root?.updated_at ?? root?.updated ?? "—";
-    $("updatedAt").textContent = String(upd);
-
-    const hint = Array.isArray(root?.matches) ? `matches:${root.matches.length}` : "single";
-    $("dataHint").textContent = hint;
-  }
-
-  function renderAll(){
-    const m = MATCHES.find(x => x.id === curMatchId) || MATCHES[0];
-    if (!m) return;
-
-    curMatchId = m.id;
-    $("selMatch").value = m.id;
-
-    renderMatchMeta(m);
-
-    const { byPlayer } = normalizeSummary(m);
-    const teamBySkill = computeTeamBySkill(byPlayer);
-
-    renderKPIs(m, byPlayer);
-    renderTeamSkillTable(m, teamBySkill);
-    renderPlayerTable(m, byPlayer, $("playerQuery").value || "");
-  }
-
-  async function load(){
-    $("errBox").textContent = "";
-    try {
-      // キャッシュ回避
-      const res = await fetch("./results.json?ts=" + Date.now(), { cache:"no-store" });
-      if (!res.ok) throw new Error(`fetch failed: HTTP ${res.status}`);
-      const text = await res.text();
-      $("rawJson").textContent = text;
-
-      const root = JSON.parse(text);
-      ROOT = root;
-
-      setTopMeta(root);
-
-      MATCHES = normalizeMatches(root);
-      // select options
-      const sel = $("selMatch");
-      sel.innerHTML = "";
-      MATCHES.forEach((m) => {
-        const opt = document.createElement("option");
-        opt.value = m.id;
-        opt.textContent = matchTitle(m);
-        sel.appendChild(opt);
-      });
-
-      curMatchId = MATCHES[0]?.id ?? "default";
-      $("playerQuery").value = "";
-      renderAll();
-    } catch (e) {
-      $("errBox").innerHTML = `<span class="bad">読み込み失敗:</span> ${esc(e?.message || e)}`;
-      $("rawJson").textContent = "—";
+      const max = Math.max(...bins);
+      const idx = bins.indexOf(max);
+      const zone = `(${(idx%3)+1},${Math.floor(idx/3)+1})`;
+      box.appendChild(insightCard(
+        "トスの偏り（粗い推定）",
+        `トス先が特定ゾーンに集まりがち：ゾーン ${zone} が最多（${max}/${setTo.length}）`,
+        "分散したいなら意識的に別コースも試す"
+      ));
+    } else {
+      box.appendChild(insightCard(
+        "トス先マップ",
+        "トス先（to）が少ないので、まずは入力で右のコートをクリックして溜めると見える",
+        "8件くらいから偏りが見え始める"
+      ));
     }
   }
 
-  // handlers
-  $("btnReload").addEventListener("click", load);
-  $("selMatch").addEventListener("change", (ev) => { curMatchId = ev.target.value; renderAll(); });
-  $("playerQuery").addEventListener("input", renderAll);
+  function insightCard(title, body, tip){
+    const div = document.createElement("div");
+    div.className = "item";
+    div.innerHTML = `<div class="t">${esc(title)}</div><div class="s">${esc(body)}<br><span class="muted">${esc(tip)}</span></div>`;
+    return div;
+  }
 
-  load();
+  function setTab(tab){
+    activeTab = tab;
+    document.querySelectorAll(".tab").forEach(t=>{
+      t.classList.toggle("active", t.dataset.tab===tab);
+    });
+    ["overview","team","players","maps","debug"].forEach(k=>{
+      $("panel_"+k).style.display = (k===tab) ? "" : "none";
+    });
+    renderActive();
+  }
+
+  function renderActive(){
+    if (!activeMatch) return;
+    if (activeTab==="overview") renderOverview(activeMatch);
+    if (activeTab==="team") renderTeam(activeMatch);
+    if (activeTab==="players") renderPlayers(activeMatch);
+    if (activeTab==="maps") renderMaps(activeMatch);
+    if (activeTab==="debug") renderDebug(activeMatch);
+  }
+
+  async function loadData(){
+    const res = await fetch("./results.json", { cache:"no-store" });
+    if (!res.ok) throw new Error("failed to fetch results.json");
+    const obj = await res.json();
+    return obj;
+  }
+
+  function populateMatches(){
+    const sel = $("matchSel");
+    sel.innerHTML = "";
+
+    const ms = (data && Array.isArray(data.matches)) ? data.matches : [];
+    $("chipUpdated").textContent = `更新: ${data?.updatedAt || "—"}`;
+    $("chipMatches").textContent = `matches: ${ms.length}`;
+
+    if (ms.length===0){
+      const opt = document.createElement("option");
+      opt.value = "";
+      opt.textContent = "（データなし）";
+      sel.appendChild(opt);
+      sel.disabled = true;
+      activeMatch = null;
+      renderActive();
+      return;
+    }
+
+    sel.disabled = false;
+    for (const m of ms){
+      const meta = m.meta || {};
+      const title = `${meta.date||"no-date"} / ${meta.opp||"—"} / ${meta.venue||"—"}`;
+      const opt = document.createElement("option");
+      opt.value = m.id || "";
+      opt.textContent = title;
+      sel.appendChild(opt);
+    }
+
+    // pick first by default
+    sel.value = ms[0].id || "";
+    activeMatch = ms[0];
+  }
+
+  async function reload(){
+    $("topSub").textContent = "読み込み中…";
+    data = await loadData();
+    populateMatches();
+    $("topSub").textContent = "※ 反映が遅いときは「再読み込み」→ ブラウザ更新（キャッシュ無視）も試してください。";
+
+    // render current tab
+    renderActive();
+  }
+
+  // bindings
+  $("btnReload").addEventListener("click", ()=>reload().catch(err=>{
+    $("topSub").textContent = "読み込みに失敗（results.json が見つからない/壊れている可能性）";
+    console.error(err);
+  }));
+
+  $("matchSel").addEventListener("change", ()=>{
+    const id = $("matchSel").value;
+    const ms = data.matches || [];
+    activeMatch = ms.find(m=>String(m.id)===String(id)) || ms[0] || null;
+    renderActive();
+  });
+
+  $("playerSearch").addEventListener("input", ()=>renderActive());
+
+  $("tabs").addEventListener("click", (ev)=>{
+    const t = ev.target.closest(".tab");
+    if (!t) return;
+    setTab(t.dataset.tab);
+  });
+
+  // init
+  reload().catch(err=>{
+    $("topSub").textContent = "読み込みに失敗（./results.json を確認して）";
+    console.error(err);
+  });
 })();
 </script>
 </body>
