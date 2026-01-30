@@ -1,5 +1,26 @@
 {
-  "updatedAt": "2026-01-30T13:10:17+09:00",
-  "note": "このファイルをあなたの集計結果JSONで置き換える",
-  "data": {}
+  "updatedAt": "2026-01-30T13:30:00+09:00",
+  "matches": [
+    {
+      "id": "m1",
+      "meta": { "date": "2026-01-30", "opp": "〇〇クラブ", "venue": "新宿スポセン", "memo": "練習試合" },
+      "players": [
+        { "id": "p1", "name": "池田", "no": "12" },
+        { "id": "p2", "name": "山田", "no": "3" }
+      ],
+      "summary": {
+        "byPlayer": {
+          "p1": {
+            "spike":   { "counts": { "point": 6, "effective": 4, "continue": 5, "miss": 2 } },
+            "serve":   { "counts": { "point": 2, "effective": 3, "continue": 6, "miss": 1 } },
+            "receive": { "counts": { "point": 0, "effective": 5, "continue": 3, "miss": 2 } }
+          },
+          "p2": {
+            "spike": { "counts": { "point": 3, "effective": 2, "continue": 4, "miss": 1 } },
+            "block": { "counts": { "point": 1, "effective": 1, "continue": 2, "miss": 0 } }
+          }
+        }
+      }
+    }
+  ]
 }

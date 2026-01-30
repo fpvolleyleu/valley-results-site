@@ -3,34 +3,519 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>集計結果</title>
+  <title>バレー集計結果（閲覧）</title>
   <style>
-    body{font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP","Yu Gothic",sans-serif;margin:16px;}
-    pre{background:#111;color:#eee;padding:12px;border-radius:10px;overflow:auto;max-height:70vh;}
-    .meta{margin:0 0 10px;color:#555;font-size:12px;}
+    :root{
+      --bg:#0b0f19; --panel:#121a2a; --panel2:#0f1626;
+      --border:#24314f; --text:#e7ecff; --muted:#a8b3d6; --good:#79ffa5; --warn:#ffd479;
+    }
+    *{ box-sizing:border-box; }
+    body{ margin:0; font-family:system-ui,-apple-system,"Segoe UI","Hiragino Sans","Noto Sans JP","Yu Gothic",sans-serif; background:var(--bg); color:var(--text); }
+    a{ color:inherit; }
+    .wrap{ max-width:1200px; margin:0 auto; padding:14px; }
+    header{ display:flex; gap:12px; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; }
+    h1{ font-size:18px; margin:0; }
+    .meta{ color:var(--muted); font-size:12px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .pill{ display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border:1px solid var(--border); border-radius:999px; color:var(--muted); }
+    .pill b{ color:var(--text); font-weight:650; }
+    .grid{ display:grid; grid-template-columns: 1.05fr .95fr; gap:12px; margin-top:12px; }
+    @media (max-width: 980px){ .grid{ grid-template-columns:1fr; } }
+    .card{ background:rgba(18,26,42,.9); border:1px solid var(--border); border-radius:16px; padding:12px; }
+    .card h2{ font-size:13px; margin:0 0 10px; display:flex; justify-content:space-between; gap:8px; align-items:center; }
+    .row{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    @media (max-width: 560px){ .row{ grid-template-columns:1fr; } }
+    label{ display:block; font-size:12px; color:var(--muted); margin:0 0 6px; }
+    select,input{
+      width:100%; border-radius:12px; border:1px solid var(--border);
+      background:rgba(11,15,25,.9); color:var(--text); padding:10px 10px; font-size:13px; outline:none;
+    }
+    button{
+      border-radius:12px; border:1px solid var(--border);
+      background:rgba(11,15,25,.9); color:var(--text);
+      padding:9px 10px; font-size:1
+cd /Users/ikedakazuki/valley-input-page/valley-results-site
+
+cat > docs/index.html <<'EOF'
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>バレー集計結果（閲覧）</title>
+  <style>
+    :root{
+      --bg:#0b0f19; --panel:#121a2a; --panel2:#0f1626;
+      --border:#24314f; --text:#e7ecff; --muted:#a8b3d6; --good:#79ffa5; --warn:#ffd479;
+    }
+    *{ box-sizing:border-box; }
+    body{ margin:0; font-family:system-ui,-apple-system,"Segoe UI","Hiragino Sans","Noto Sans JP","Yu Gothic",sans-serif; background:var(--bg); color:var(--text); }
+    a{ color:inherit; }
+    .wrap{ max-width:1200px; margin:0 auto; padding:14px; }
+    header{ display:flex; gap:12px; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; }
+    h1{ font-size:18px; margin:0; }
+    .meta{ color:var(--muted); font-size:12px; display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    .pill{ display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border:1px solid var(--border); border-radius:999px; color:var(--muted); }
+    .pill b{ color:var(--text); font-weight:650; }
+    .grid{ display:grid; grid-template-columns: 1.05fr .95fr; gap:12px; margin-top:12px; }
+    @media (max-width: 980px){ .grid{ grid-template-columns:1fr; } }
+    .card{ background:rgba(18,26,42,.9); border:1px solid var(--border); border-radius:16px; padding:12px; }
+    .card h2{ font-size:13px; margin:0 0 10px; display:flex; justify-content:space-between; gap:8px; align-items:center; }
+    .row{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    @media (max-width: 560px){ .row{ grid-template-columns:1fr; } }
+    label{ display:block; font-size:12px; color:var(--muted); margin:0 0 6px; }
+    select,input{
+      width:100%; border-radius:12px; border:1px solid var(--border);
+      background:rgba(11,15,25,.9); color:var(--text); padding:10px 10px; font-size:13px; outline:none;
+    }
+    button{
+      border-radius:12px; border:1px solid var(--border);
+      background:rgba(11,15,25,.9); color:var(--text);
+      padding:9px 10px; font-size:12px; cursor:pointer;
+    }
+    button:hover{ filter:brightness(1.08); }
+    .btns{ display:flex; flex-wrap:wrap; gap:8px; }
+    .hint{ font-size:11px; color:var(--muted); margin-top:8px; line-height:1.5; }
+    table{ width:100%; border-collapse:separate; border-spacing:0; border:1px solid var(--border); border-radius:14px; overflow:hidden; background:rgba(11,15,25,.65); font-size:12px; }
+    th,td{ padding:9px 8px; border-bottom:1px solid rgba(36,49,79,.55); vertical-align:middle; }
+    th{ text-align:left; background:rgba(18,26,42,.55); color:var(--muted); font-weight:650; }
+    tr:last-child td{ border-bottom:none; }
+    .right{ text-align:right; }
+    .small{ font-size:11px; color:var(--muted); }
+    .kpi{ display:flex; gap:10px; flex-wrap:wrap; }
+    .kpi .box{ background:rgba(11,15,25,.55); border:1px solid var(--border); border-radius:14px; padding:10px; min-width:170px; flex:1; }
+    .kpi .box .t{ font-size:11px; color:var(--muted); }
+    .kpi .box .v{ font-size:18px; font-weight:750; margin-top:4px; }
+    .bar{ height:10px; border-radius:999px; border:1px solid var(--border); overflow:hidden; background:rgba(11,15,25,.55); }
+    .bar > div{ height:100%; width:0%; background:linear-gradient(90deg, #8af, #7fa, #ffd479); }
+    details{ border:1px solid var(--border); border-radius:14px; background:rgba(11,15,25,.55); padding:8px 10px; }
+    summary{ cursor:pointer; font-size:12px; color:var(--muted); }
+    pre{ margin:10px 0 0; border:1px solid var(--border); border-radius:14px; background:rgba(11,15,25,.85); padding:10px; overflow:auto; max-height:320px; font-size:11px; line-height:1.45; }
+    .bad{ color:#ff9aa2; }
   </style>
 </head>
 <body>
-  <h1>集計結果</h1>
-  <p class="meta" id="meta">loading...</p>
-  <pre id="out">loading...</pre>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>バレー集計結果（閲覧）</h1>
+      <div class="meta" id="topMeta">
+        <span class="pill">更新: <b id="updatedAt">—</b></span>
+        <span class="pill">データ: <b id="dataHint">—</b></span>
+      </div>
+    </div>
+    <div class="btns">
+      <button id="btnReload">再読み込み</button>
+    </div>
+  </header>
 
-  <script>
-    (async () => {
-      // cache: "no-store" で最新を取りに行く（CDNキャッシュ対策）
-      const res = await fetch("./results.json", { cache: "no-store" });
-      const text = await res.text();
-      document.getElementById("out").textContent = text;
+  <div class="grid">
+    <!-- LEFT -->
+    <div class="card">
+      <h2>試合（または集計単位）</h2>
 
-      try{
-        const j = JSON.parse(text);
-        const upd = j.updatedAt ?? j.updated_at ?? j.updated ?? null;
-        document.getElementById("meta").textContent =
-          upd ? `更新: ${upd}` : "更新日時: (results.json内に updatedAt を入れると表示されます)";
-      }catch{
-        document.getElementById("meta").textContent = "JSONとして解釈できませんでした（results.jsonを確認）";
+      <div class="row">
+        <div>
+          <label>対象</label>
+          <select id="selMatch"></select>
+        </div>
+        <div>
+          <label>選手検索</label>
+          <input id="playerQuery" type="text" placeholder="例：池田 / #12 など">
+        </div>
+      </div>
+
+      <div class="hint" id="matchMeta">—</div>
+
+      <div style="margin-top:10px;" class="kpi" id="kpis"></div>
+
+      <div style="margin-top:12px;">
+        <h2 style="margin:0 0 10px; font-size:13px;">チーム集計（スキル別）</h2>
+        <div id="teamSkillTable"></div>
+      </div>
+
+      <div style="margin-top:12px;">
+        <h2 style="margin:0 0 10px; font-size:13px;">選手別集計</h2>
+        <div class="hint" style="margin:0 0 8px;">
+          ※ 効果率は（得点=1, 効果的=0.7, 継続=0.3, ミス=0）で計算（結果がこの4区分の場合）。<br>
+          ※ もし results.json に weights が入っている場合はそちらを優先。
+        </div>
+        <div id="playerTable"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="card">
+      <h2>データ確認</h2>
+
+      <details>
+        <summary>results.json をそのまま表示（デバッグ用）</summary>
+        <pre id="rawJson">loading...</pre>
+      </details>
+
+      <div class="hint">
+        ※ このページは <code>./results.json</code> を読み込んで表示します。<br>
+        ※ 反映が遅いときは「再読み込み」を押して、ブラウザ更新も試してください。
+      </div>
+
+      <div class="hint" id="errBox"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+
+  const DEFAULT_WEIGHTS = {
+    spike: { point:1, effective:0.7, continue:0.3, miss:0 },
+    serve: { point:1, effective:0.7, continue:0.3, miss:0 },
+    block: { point:1, effective:0.7, continue:0.3, miss:0 },
+    receive:{ point:1, effective:0.7, continue:0.3, miss:0 },
+    set:   { point:1, effective:0.7, continue:0.3, miss:0 },
+  };
+
+  const SKILL_LABEL = {
+    spike:"スパイク", serve:"サーブ", block:"ブロック", receive:"レシーブ", set:"トス"
+  };
+  const RESULT_LABEL = {
+    point:"得点", effective:"効果的", continue:"継続", miss:"ミス"
+  };
+
+  let ROOT = null;     // loaded results.json root
+  let MATCHES = [];    // normalized matches list
+  let curMatchId = null;
+
+  function esc(s){
+    return String(s ?? "").replace(/[&<>"']/g, (c)=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+  }
+
+  function toPct(x){
+    if (!Number.isFinite(x)) return "—";
+    return (x*100).toFixed(1) + "%";
+  }
+
+  function sumCounts(counts){
+    let t = 0;
+    for (const k of Object.keys(counts||{})) {
+      const v = Number(counts[k] ?? 0);
+      if (Number.isFinite(v)) t += v;
+    }
+    return t;
+  }
+
+  function calcScoreFromCounts(counts, weights){
+    const w = weights || {};
+    const total = sumCounts(counts);
+    if (!total) return { total:0, score:NaN };
+    let s = 0;
+    for (const [rk, rv] of Object.entries(counts||{})) {
+      const c = Number(rv ?? 0);
+      if (!Number.isFinite(c)) continue;
+      const ww = (rk in w) ? Number(w[rk]) : 0;
+      s += c * (Number.isFinite(ww) ? ww : 0);
+    }
+    return { total, score: s / total };
+  }
+
+  function normalizeMatches(root){
+    // 1) root.matches があればそれを使う
+    if (root && Array.isArray(root.matches) && root.matches.length) {
+      return root.matches.map((m, i) => ({
+        id: m.id ?? String(i),
+        meta: m.meta ?? {},
+        players: Array.isArray(m.players) ? m.players : [],
+        summary: m.summary ?? m.agg ?? {},
+        weights: m.weights ?? root.weights ?? null,
+        raw: m
+      }));
+    }
+
+    // 2) 単一データの場合
+    return [{
+      id: root?.id ?? "default",
+      meta: root?.meta ?? {},
+      players: Array.isArray(root?.players) ? root.players : [],
+      summary: root?.summary ?? root?.agg ?? {},
+      weights: root?.weights ?? null,
+      raw: root
+    }];
+  }
+
+  function matchTitle(m){
+    const d = m.meta?.date ?? "";
+    const opp = m.meta?.opp ?? m.meta?.opponent ?? "";
+    const venue = m.meta?.venue ?? "";
+    const parts = [];
+    if (d) parts.push(d);
+    if (opp) parts.push(opp);
+    if (venue) parts.push(venue);
+    return parts.length ? parts.join(" / ") : `集計 ${m.id}`;
+  }
+
+  function pickWeights(m){
+    return m.weights || DEFAULT_WEIGHTS;
+  }
+
+  function buildPlayerMap(m){
+    const map = new Map();
+    for (const p of (m.players||[])) {
+      if (!p) continue;
+      const id = p.id ?? p.playerId ?? p.key ?? p.name;
+      if (!id) continue;
+      map.set(String(id), { id:String(id), name:p.name ?? p.playerName ?? String(id), no: p.no ?? p.number ?? "" });
+    }
+    return map;
+  }
+
+  function normalizeSummary(m){
+    // 期待: summary.byPlayer[playerId][skill].counts or {point,effective,...}
+    // または summary が { playerName: { skill: {point...} } } みたいな形でも拾う
+    const s = m.summary || {};
+    const byPlayer = s.byPlayer || s.players || null;
+
+    if (byPlayer && typeof byPlayer === "object") return { byPlayer };
+
+    // fallback: playerNameキー形式
+    // => 擬似playerId = playerName で扱う
+    if (s && typeof s === "object") {
+      const keys = Object.keys(s);
+      // bySkillなどのメタっぽいのを除外して「それ以外がプレイヤー」っぽければ採用
+      const ignore = new Set(["bySkill","team","meta","weights","updatedAt","matches","summary","agg"]);
+      const cand = keys.filter(k => !ignore.has(k));
+      if (cand.length) {
+        const bp = {};
+        for (const pn of cand) bp[pn] = s[pn];
+        return { byPlayer: bp };
       }
-    })();
-  </script>
+    }
+    return { byPlayer: {} };
+  }
+
+  function computeTeamBySkill(byPlayer){
+    const out = {};
+    for (const [pid, pObj] of Object.entries(byPlayer||{})) {
+      if (!pObj || typeof pObj !== "object") continue;
+      for (const [skill, val] of Object.entries(pObj||{})) {
+        if (!val || typeof val !== "object") continue;
+        const counts = val.counts || val;
+        out[skill] ||= {};
+        for (const [rk, rv] of Object.entries(counts||{})) {
+          const n = Number(rv ?? 0);
+          if (!Number.isFinite(n)) continue;
+          out[skill][rk] = (out[skill][rk] || 0) + n;
+        }
+      }
+    }
+    return out;
+  }
+
+  function renderKPIs(m, byPlayer){
+    const playersN = m.players?.length || Object.keys(byPlayer||{}).length || 0;
+
+    // 全スキル合計試行数
+    let events = 0;
+    for (const p of Object.values(byPlayer||{})) {
+      for (const v of Object.values(p||{})) {
+        const counts = v?.counts || v;
+        events += sumCounts(counts);
+      }
+    }
+
+    const html = `
+      <div class="box"><div class="t">選手数</div><div class="v">${playersN}</div></div>
+      <div class="box"><div class="t">記録数（概算）</div><div class="v">${events}</div></div>
+      <div class="box"><div class="t">相手</div><div class="v" style="font-size:14px;">${esc(m.meta?.opp ?? m.meta?.opponent ?? "—")}</div></div>
+    `;
+    $("kpis").innerHTML = html;
+  }
+
+  function renderTeamSkillTable(m, teamBySkill){
+    const wAll = pickWeights(m);
+
+    const skills = Object.keys(teamBySkill||{}).sort();
+    if (!skills.length) {
+      $("teamSkillTable").innerHTML = `<div class="hint">集計データがありません（results.json の summary を確認）</div>`;
+      return;
+    }
+
+    let rows = "";
+    for (const sk of skills) {
+      const counts = teamBySkill[sk] || {};
+      const weights = wAll[sk] || DEFAULT_WEIGHTS[sk] || {};
+      const { total, score } = calcScoreFromCounts(counts, weights);
+
+      // point/effective/continue/miss を優先表示
+      const p = Number(counts.point ?? 0), e = Number(counts.effective ?? 0), c = Number(counts.continue ?? 0), m0 = Number(counts.miss ?? 0);
+      const knownTotal = (Number.isFinite(p)?p:0)+(Number.isFinite(e)?e:0)+(Number.isFinite(c)?c:0)+(Number.isFinite(m0)?m0:0);
+      const note = (knownTotal === total) ? "" : `<span class="small">（他区分あり）</span>`;
+
+      rows += `
+        <tr>
+          <td>${esc(SKILL_LABEL[sk] || sk)}</td>
+          <td class="right">${toPct(score)}</td>
+          <td class="right">${total || 0}</td>
+          <td class="right">${Number.isFinite(p)?p:0}</td>
+          <td class="right">${Number.isFinite(e)?e:0}</td>
+          <td class="right">${Number.isFinite(c)?c:0}</td>
+          <td class="right">${Number.isFinite(m0)?m0:0} ${note}</td>
+        </tr>
+      `;
+    }
+
+    const html = `
+      <table>
+        <thead>
+          <tr>
+            <th>スキル</th>
+            <th class="right">効果率</th>
+            <th class="right">合計</th>
+            <th class="right">得点</th>
+            <th class="right">効果的</th>
+            <th class="right">継続</th>
+            <th class="right">ミス</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+    $("teamSkillTable").innerHTML = html;
+  }
+
+  function renderPlayerTable(m, byPlayer, query){
+    const wAll = pickWeights(m);
+    const pmap = buildPlayerMap(m);
+
+    // playerId一覧
+    const ids = Object.keys(byPlayer||{});
+    const list = ids.map(pid => {
+      const p = pmap.get(String(pid)) || { id:String(pid), name:String(pid), no:"" };
+      return { pid:String(pid), name:p.name, no:p.no, obj:byPlayer[pid] || {} };
+    }).sort((a,b)=>a.name.localeCompare(b.name, "ja"));
+
+    const q = (query || "").trim().toLowerCase();
+    const filtered = q
+      ? list.filter(x => (`${x.name} ${x.no} ${x.pid}`).toLowerCase().includes(q))
+      : list;
+
+    if (!filtered.length) {
+      $("playerTable").innerHTML = `<div class="hint">該当する選手がいません</div>`;
+      return;
+    }
+
+    // 表示するスキル列（存在するものだけ）
+    const skillSet = new Set();
+    for (const x of filtered) for (const sk of Object.keys(x.obj||{})) skillSet.add(sk);
+    const skills = [...skillSet].sort();
+
+    // header
+    let head = `<tr><th>選手</th>`;
+    for (const sk of skills) head += `<th class="right">${esc(SKILL_LABEL[sk] || sk)}</th>`;
+    head += `</tr>`;
+
+    // rows
+    let rows = "";
+    for (const x of filtered) {
+      const name = x.no ? `${x.name} <span class="small">#${esc(x.no)}</span>` : esc(x.name);
+      let r = `<tr><td>${name}</td>`;
+      for (const sk of skills) {
+        const val = x.obj?.[sk];
+        const counts = val?.counts || val || {};
+        const weights = wAll?.[sk] || DEFAULT_WEIGHTS[sk] || {};
+        const { total, score } = calcScoreFromCounts(counts, weights);
+        const pct = toPct(score);
+        r += `<td class="right">${pct}<div class="small">${total||0}回</div></td>`;
+      }
+      r += `</tr>`;
+      rows += r;
+    }
+
+    $("playerTable").innerHTML = `
+      <table>
+        <thead>${head}</thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+  }
+
+  function renderMatchMeta(m){
+    const parts = [];
+    const d = m.meta?.date ?? "";
+    const opp = m.meta?.opp ?? m.meta?.opponent ?? "";
+    const v = m.meta?.venue ?? "";
+    const memo = m.meta?.memo ?? "";
+    if (d) parts.push(`日付: ${esc(d)}`);
+    if (opp) parts.push(`相手: ${esc(opp)}`);
+    if (v) parts.push(`会場: ${esc(v)}`);
+    if (memo) parts.push(`メモ: ${esc(memo)}`);
+    $("matchMeta").innerHTML = parts.length ? parts.join(" / ") : "—";
+  }
+
+  function setTopMeta(root){
+    const upd = root?.updatedAt ?? root?.updated_at ?? root?.updated ?? "—";
+    $("updatedAt").textContent = String(upd);
+
+    const hint = Array.isArray(root?.matches) ? `matches:${root.matches.length}` : "single";
+    $("dataHint").textContent = hint;
+  }
+
+  function renderAll(){
+    const m = MATCHES.find(x => x.id === curMatchId) || MATCHES[0];
+    if (!m) return;
+
+    curMatchId = m.id;
+    $("selMatch").value = m.id;
+
+    renderMatchMeta(m);
+
+    const { byPlayer } = normalizeSummary(m);
+    const teamBySkill = computeTeamBySkill(byPlayer);
+
+    renderKPIs(m, byPlayer);
+    renderTeamSkillTable(m, teamBySkill);
+    renderPlayerTable(m, byPlayer, $("playerQuery").value || "");
+  }
+
+  async function load(){
+    $("errBox").textContent = "";
+    try {
+      // キャッシュ回避
+      const res = await fetch("./results.json?ts=" + Date.now(), { cache:"no-store" });
+      if (!res.ok) throw new Error(`fetch failed: HTTP ${res.status}`);
+      const text = await res.text();
+      $("rawJson").textContent = text;
+
+      const root = JSON.parse(text);
+      ROOT = root;
+
+      setTopMeta(root);
+
+      MATCHES = normalizeMatches(root);
+      // select options
+      const sel = $("selMatch");
+      sel.innerHTML = "";
+      MATCHES.forEach((m) => {
+        const opt = document.createElement("option");
+        opt.value = m.id;
+        opt.textContent = matchTitle(m);
+        sel.appendChild(opt);
+      });
+
+      curMatchId = MATCHES[0]?.id ?? "default";
+      $("playerQuery").value = "";
+      renderAll();
+    } catch (e) {
+      $("errBox").innerHTML = `<span class="bad">読み込み失敗:</span> ${esc(e?.message || e)}`;
+      $("rawJson").textContent = "—";
+    }
+  }
+
+  // handlers
+  $("btnReload").addEventListener("click", load);
+  $("selMatch").addEventListener("change", (ev) => { curMatchId = ev.target.value; renderAll(); });
+  $("playerQuery").addEventListener("input", renderAll);
+
+  load();
+})();
+</script>
 </body>
 </html>
